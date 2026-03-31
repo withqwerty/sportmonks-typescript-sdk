@@ -27,7 +27,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\"",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "npm run lint && npm run test && npm run build",
+    "prepublishOnly": "pnpm lint && pnpm test && pnpm build",
     "prepare": "husky",
     "repl": "tsx tools/repl.ts",
     "repl:advanced": "tsx tools/repl-advanced.ts"
@@ -94,11 +94,16 @@
       "!src/**/index.ts"
     ]
   },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  },
   "lint-staged": {
     "{src,tests}/**/*.{ts,tsx}": [
       "eslint --fix",
       "prettier --write",
-      "bash -c 'npm run typecheck'"
+      "bash -c 'pnpm typecheck'"
     ],
     "*.{json,md}": [
       "prettier --write"

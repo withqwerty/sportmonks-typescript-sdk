@@ -25,47 +25,50 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18.x'
           registry-url: 'https://registry.npmjs.org'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Run tests
-        run: npm test
+        run: pnpm test
 
       - name: Build package
-        run: npm run build
+        run: pnpm run build
 
       - name: Check package
         run: |
-          npm pack --dry-run
+          pnpm pack --dry-run
           echo "Package contents:"
-          npm pack --dry-run 2>&1 | grep -E "npm notice"
+          pnpm pack --dry-run 2>&1
 
       - name: Configure npm for publishing
         run: |
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-          npm whoami
+          pnpm whoami
 
       - name: Publish to npm (dry run)
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.dry-run == 'true'
-        run: npm publish --dry-run
+        run: pnpm publish --dry-run --access public
 
       - name: Publish to npm
         if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && github.event.inputs.dry-run == 'false')
-        run: npm publish --access public
+        run: pnpm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create GitHub release assets
         if: github.event_name == 'release'
         run: |
-          npm pack
+          pnpm pack
           mv *.tgz sportmonks-typescript-sdk-${{ github.event.release.tag_name }}.tgz
 
       - name: Upload release assets
